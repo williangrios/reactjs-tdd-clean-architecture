@@ -1,5 +1,7 @@
-import { RemoteAuthentication } from "./remote-authentication"
+import { RemoteAuthentication } from "@/data/usecase/authentication/remote-authentication"
 import { HttpPostClientSpy } from "@/data/test/mock-http-client"
+import { HttpStatusCode } from "@/data/protocols/http/http-response";
+import { InvalidCredentialsError } from "@/domain/errors/invalid-credentials-error";
 import { mockAuthentication } from "@/domain/test/mock-authentication"
 import { faker } from '@faker-js/faker';
 
@@ -34,4 +36,18 @@ describe('RemoteAuthentication', () => {
     //se colocássemos o toBe, estariamos comparando os ponteiros do objeto (nunca vai dar certo)
     expect(httpPostClientSpy.body).toEqual(authParams)
   })
+
+  test('should throw InvalidCredentialsError error if HttpPostClient returns 401', async () => {
+    const {sut, httpPostClientSpy} = makeSut()
+    //mockando, simulando um unauthorized
+    httpPostClientSpy.response = {
+      statusCode: HttpStatusCode.unauthorized
+    }
+    //quando vamos testar exceção com o jest, temos que chamar o método sem o await, captura como uma promise
+    //depois faço o teste com a promise
+    const promise = sut.auth(mockAuthentication())
+    //espero que a promise seja rejeitada
+    await expect(promise).rejects.toThrow(new InvalidCredentialsError())
+  })
+
 })
