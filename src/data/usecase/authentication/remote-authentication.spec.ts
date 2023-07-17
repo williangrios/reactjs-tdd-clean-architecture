@@ -4,6 +4,7 @@ import { HttpStatusCode } from "@/data/protocols/http/http-response";
 import { InvalidCredentialsError } from "@/domain/errors/invalid-credentials-error";
 import { mockAuthentication } from "@/domain/test/mock-authentication"
 import { faker } from '@faker-js/faker';
+import { UnexpectedError } from "@/domain/errors/unexpected-error";
 
 
 type SutTypes = {
@@ -48,6 +49,45 @@ describe('RemoteAuthentication', () => {
     const promise = sut.auth(mockAuthentication())
     //espero que a promise seja rejeitada
     await expect(promise).rejects.toThrow(new InvalidCredentialsError())
+  })
+
+  test('should throw UnexpectedError error if HttpPostClient returns 400', async () => {
+    const {sut, httpPostClientSpy} = makeSut()
+    //mockando, simulando um unexpected error
+    httpPostClientSpy.response = {
+      statusCode: HttpStatusCode.badRequest
+    }
+    //quando vamos testar exceção com o jest, temos que chamar o método sem o await, captura como uma promise
+    //depois faço o teste com a promise
+    const promise = sut.auth(mockAuthentication())
+    //espero que a promise seja rejeitada
+    await expect(promise).rejects.toThrow(new UnexpectedError())
+  })
+
+  test('should throw Server error error if HttpPostClient returns 500', async () => {
+    const {sut, httpPostClientSpy} = makeSut()
+    //mockando, simulando um server error
+    httpPostClientSpy.response = {
+      statusCode: HttpStatusCode.serverError
+    }
+    //quando vamos testar exceção com o jest, temos que chamar o método sem o await, captura como uma promise
+    //depois faço o teste com a promise
+    const promise = sut.auth(mockAuthentication())
+    //espero que a promise seja rejeitada
+    await expect(promise).rejects.toThrow(new UnexpectedError())
+  })
+
+  test('should throw Not Found error if HttpPostClient returns 404', async () => {
+    const {sut, httpPostClientSpy} = makeSut()
+    //mockando, simulando um server error
+    httpPostClientSpy.response = {
+      statusCode: HttpStatusCode.notFound
+    }
+    //quando vamos testar exceção com o jest, temos que chamar o método sem o await, captura como uma promise
+    //depois faço o teste com a promise
+    const promise = sut.auth(mockAuthentication())
+    //espero que a promise seja rejeitada
+    await expect(promise).rejects.toThrow(new UnexpectedError())
   })
 
 })
