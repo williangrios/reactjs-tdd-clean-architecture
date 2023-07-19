@@ -6,11 +6,15 @@ import { Faker, faker } from "@faker-js/faker";
 jest.mock('axios')
 // agora esta variavel tem acesso a tudo que o axios tem
 const mockedAxios = axios as jest.Mocked<typeof axios>
+const makeSut = (): AxiosHttpClient => {
+  return new AxiosHttpClient()
+}
 
 describe('AxiosHttpClient', () => {
   test('Should call axios with correct url', async () => {
-    const sut = new AxiosHttpClient()
+
     const url = faker.internet.url()
+    const sut = makeSut()
     await sut.post({
       url
     })
