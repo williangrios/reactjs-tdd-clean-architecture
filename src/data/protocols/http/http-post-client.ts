@@ -1,8 +1,8 @@
 import { HttpResponse } from '@/data/protocols/http/http-response'
 
-export type HttpPostParams = {
+export type HttpPostParams<T> = {
   url: string
-  body?: object
+  body?: T
 }
 
 // o data layer esta entre o Domain e o Infra
@@ -13,6 +13,8 @@ export type HttpPostParams = {
 // ou seja, vamos ter que criar alguns erros dentro do dominio (ex: erro 400, 401, tratando o que queremos enviar para o UI)
 // por isso vamos colocar uma resposta aqui (Httpresponse)
 
-export interface HttpPostClient {
-  post(params: HttpPostParams): Promise<HttpResponse>
+// o T indica que a classe que for instanciar é obrigada a informar o tipo do body do parametro (T) e o tipo do body do retorno da funcao (R)
+export interface HttpPostClient<T, R> {
+  // repassando o tipo para o post params
+  post(params: HttpPostParams<T>): Promise<HttpResponse<R>>
 }
